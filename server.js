@@ -88,7 +88,8 @@ app.post('/api/register',
         res.status(201).json({ message: "User registered successfully!" });
 
     } catch (error) {
-        res.status(500).json({ message: "Server error", error: error.message });
+        console.error(error);
+        res.status(500).json({ message: "Something went wrong. Please try again." });
     }
 });
 
@@ -131,7 +132,8 @@ app.post('/api/login',
             token: token
         });
     } catch (error) {
-        res.status(500).json({ message: "Server error", error: error.message });
+        console.error(error);
+res.status(500).json({ message: "Something went wrong. Please try again." });
     }
 });
 
@@ -160,7 +162,8 @@ app.get('/api/users/:email', verifyToken, async (userReq, userRes) => {
         const users = await User.find({ email: { $ne: currentEmail } }).select('username email');
         userRes.status(200).json(users);
     } catch (error) {
-        userRes.status(500).json({ message: "Server error", error: error.message });
+        console.error(error);
+userRes.status(500).json({ message: "Something went wrong. Please try again." });
     }
 });
 
@@ -176,7 +179,8 @@ app.get('/api/messages/:user1/:user2', verifyToken, async (req, res) => {
         }).sort({ timestamp: 1 });
         res.status(200).json(messages);
     } catch (error) {
-        res.status(500).json({ message: "Server error", error: error.message });
+        console.error(error);
+res.status(500).json({ message: "Something went wrong. Please try again." });
     }
 });
 
