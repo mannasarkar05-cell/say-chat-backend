@@ -1,6 +1,3 @@
-নিচে পুরো ফাইলটা দিলাম, দুই জায়গায় CORS বদলানো হয়েছে (app.use(cors(...)) আর socket.io-এর cors)। এটা কপি করে তোমার পুরো server.js মুছে বসিয়ে দাও:
-
-javascript
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
