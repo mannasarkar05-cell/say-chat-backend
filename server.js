@@ -4,6 +4,7 @@ const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const User = require('./models/User');
@@ -83,18 +84,43 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ message: "Invalid password" });
         }
 
+        const token = jwt.sign(
+            { email: user.email, username: user.username },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
         res.status(200).json({ 
             message: "Login Successful", 
             username: user.username,
-            email: user.email 
+            email: user.email,
+            token: token
         });
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 });
 
+// টোকেন যাচাই করার Middleware
+const verifyToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: "Access denied. No token provided." });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        return res.status(403).json({ message: "Invalid or expired token." });
+    }
+};
+
 // ৩. সব ইউজারের তালিকা পাওয়ার API
-app.get('/api/users/:email', async (userReq, userRes) => {
+app.get('/api/users/:email', verifyToken, async (userReq, userRes) => {
     try {
         const currentEmail = userReq.params.email;
         const users = await User.find({ email: { $ne: currentEmail } }).select('username email');
@@ -105,7 +131,7 @@ app.get('/api/users/:email', async (userReq, userRes) => {
 });
 
 // ৪. পুরোনো চ্যাট হিস্ট্রি দেখার API
-app.get('/api/messages/:user1/:user2', async (req, res) => {
+app.get('/api/messages/:user1/:user2', verifyToken, async (req, res) => {
     try {
         const { user1, user2 } = req.params;
         const messages = await Message.find({
