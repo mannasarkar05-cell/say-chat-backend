@@ -7,12 +7,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 require('dotenv').config();
 
 const User = require('./models/User');
 const Message = require('./models/Message');
 
 const app = express();
+
+app.use(helmet());
 
 app.use(cors({
     origin: "https://say-chat-frontend.vercel.app",
