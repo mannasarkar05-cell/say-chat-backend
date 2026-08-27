@@ -6,6 +6,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const User = require('./models/User');
@@ -38,6 +39,15 @@ mongoose.connect(process.env.MONGO_URI)
     console.log("Database Connection Failed: ", err);
 });
 
+// লগইন/রেজিস্ট্রেশনের জন্য Rate Limiter
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // ১৫ মিনিট
+    max: 20, // সর্বোচ্চ ২০ বার চেষ্টা
+    message: { message: "Too many attempts. Please try again after 15 minutes." },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 // টেস্ট রুট
 app.get('/', (req, res) => {
     res.send("Say Chat App Backend is running!");
@@ -45,6 +55,7 @@ app.get('/', (req, res) => {
 
 // ১. ইউজার রেজিস্ট্রেশন (Sign Up) API
 app.post('/api/register',
+    authLimiter,
     [
         body('username').trim().notEmpty().withMessage('Username is required'),
         body('email').isEmail().withMessage('Please enter a valid email'),
@@ -83,6 +94,7 @@ app.post('/api/register',
 
 // ২. ইউজার লগইন (Login) API
 app.post('/api/login',
+    authLimiter,
     [
         body('email').isEmail().withMessage('Please enter a valid email'),
         body('password').notEmpty().withMessage('Password is required')
