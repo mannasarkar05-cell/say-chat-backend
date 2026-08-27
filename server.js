@@ -1,3 +1,6 @@
+নিচে পুরো ফাইলটা দিলাম, দুই জায়গায় CORS বদলানো হয়েছে (app.use(cors(...)) আর socket.io-এর cors)। এটা কপি করে তোমার পুরো server.js মুছে বসিয়ে দাও:
+
+javascript
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -13,7 +16,7 @@ const Message = require('./models/Message');
 const app = express();
 
 app.use(cors({
-    origin: "*",
+    origin: "https://say-chat-frontend.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
@@ -23,7 +26,7 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*",
+        origin: "https://say-chat-frontend.vercel.app",
         methods: ["GET", "POST"]
     }
 });
